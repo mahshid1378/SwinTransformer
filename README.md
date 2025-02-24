@@ -308,3 +308,37 @@ trademarks or logos is subject to and must follow
 [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
+
+
+To implement this model, I encountered a challenge of low memory, but you can increase some of the memory by writing the following code.
+```shell
+from torch.cuda.amp import autocast, GradScaler
+
+# Implementing mixed precision
+scaler = GradScaler()
+
+for data, target in train_loader:
+    optimizer.zero_grad()
+    with autocast():
+        output = model(data)
+        loss = criterion(output, target)
+    scaler.scale(loss).backward()
+    scaler.step(optimizer)
+    scaler.update()
+```
+another challenge is excute run multi classification than solve using code:
+```shell
+# Adjusting the final layer for multi-class classification
+model.head = nn.Linear(in_features=model.head.in_features, out_features=num_classes)
+
+# CrossEntropyLoss handles multi-class classification
+criterion = nn.CrossEntropyLoss()
+
+# During training
+for data, target in train_loader:
+    optimizer.zero_grad()
+    output = model(data)
+    loss = criterion(output, target)
+    loss.backward()
+    optimizer.step()
+```
